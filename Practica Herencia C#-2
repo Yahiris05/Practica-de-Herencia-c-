@@ -1,0 +1,164 @@
+using System;
+using System.Collections.Generic;
+
+namespace ChimiMiBarriga
+{
+    // Clase base para todas las hamburguesas
+    public class Hamburguesa
+    {
+        protected string TipoPan { get; set; }
+        protected string TipoCarne { get; set; }
+        protected decimal PrecioBase { get; set; }
+        protected List<string> IngredientesAdicionales { get; set; }
+        protected List<decimal> PreciosAdicionales { get; set; }
+        protected int MaxIngredientes { get; set; }
+
+        public Hamburguesa(string tipoPan, string tipoCarne, decimal precioBase)
+        {
+            TipoPan = tipoPan;
+            TipoCarne = tipoCarne;
+            PrecioBase = precioBase;
+            IngredientesAdicionales = new List<string>();
+            PreciosAdicionales = new List<decimal>();
+            MaxIngredientes = 4; // Máximo para la hamburguesa clásica
+        }
+
+        public virtual void AgregarIngrediente(string ingrediente, decimal precio)
+        {
+            if (IngredientesAdicionales.Count < MaxIngredientes)
+            {
+                IngredientesAdicionales.Add(ingrediente);
+                PreciosAdicionales.Add(precio);
+                Console.WriteLine($"Ingrediente '{ingrediente}' agregado por ${precio:F2}");
+            }
+            else
+            {
+                Console.WriteLine($"No se pueden agregar más ingredientes. Máximo permitido: {MaxIngredientes}");
+            }
+        }
+
+        public virtual decimal CalcularPrecioTotal()
+        {
+            decimal total = PrecioBase;
+            foreach (var precio in PreciosAdicionales)
+            {
+                total += precio;
+            }
+            return total;
+        }
+
+        public virtual void MostrarDetalle()
+        {
+            Console.WriteLine("\n--- Detalle de la Hamburguesa ---");
+            Console.WriteLine($"Tipo de pan: {TipoPan}");
+            Console.WriteLine($"Tipo de carne: {TipoCarne}");
+            Console.WriteLine($"Precio base: ${PrecioBase:F2}");
+
+            if (IngredientesAdicionales.Count > 0)
+            {
+                Console.WriteLine("\nIngredientes adicionales:");
+                for (int i = 0; i < IngredientesAdicionales.Count; i++)
+                {
+                    Console.WriteLine($"- {IngredientesAdicionales[i]}: ${PreciosAdicionales[i]:F2}");
+                }
+            }
+            else
+            {
+                Console.WriteLine("\nNo se agregaron ingredientes adicionales.");
+            }
+
+            Console.WriteLine($"\nTOTAL: ${CalcularPrecioTotal():F2}");
+        }
+    }
+
+    // Hamburguesa Saludable (pan integral, hasta 6 ingredientes adicionales)
+    public class HamburguesaSaludable : Hamburguesa
+    {
+        public HamburguesaSaludable(string tipoCarne, decimal precioBase) 
+            : base("Integral", tipoCarne, precioBase)
+        {
+            MaxIngredientes = 6; // Puede tener hasta 6 ingredientes adicionales
+        }
+
+        public override void AgregarIngrediente(string ingrediente, decimal precio)
+        {
+            if (IngredientesAdicionales.Count < MaxIngredientes)
+            {
+                base.AgregarIngrediente(ingrediente, precio);
+            }
+            else
+            {
+                Console.WriteLine($"No se pueden agregar más ingredientes. Máximo permitido en hamburguesa saludable: {MaxIngredientes}");
+            }
+        }
+    }
+
+    // Hamburguesa Premium (viene con papas y bebida, no permite más ingredientes)
+    public class HamburguesaPremium : Hamburguesa
+    {
+        private const decimal PrecioPapas = 2.50m;
+        private const decimal PrecioBebida = 1.80m;
+
+        public HamburguesaPremium(string tipoPan, string tipoCarne, decimal precioBase) 
+            : base(tipoPan, tipoCarne, precioBase)
+        {
+            MaxIngredientes = 0; // No permite ingredientes adicionales
+            // Se agregan automáticamente papas y bebida
+            Console.WriteLine("Hamburguesa Premium incluye papas y bebida");
+        }
+
+        public override void AgregarIngrediente(string ingrediente, decimal precio)
+        {
+            Console.WriteLine("No se permiten ingredientes adicionales en la hamburguesa Premium");
+        }
+
+        public override decimal CalcularPrecioTotal()
+        {
+            return base.CalcularPrecioTotal() + PrecioPapas + PrecioBebida;
+        }
+
+        public override void MostrarDetalle()
+        {
+            base.MostrarDetalle();
+            Console.WriteLine($"- Papas: ${PrecioPapas:F2}");
+            Console.WriteLine($"- Bebida: ${PrecioBebida:F2}");
+            Console.WriteLine($"\nTOTAL (incluye papas y bebida): ${CalcularPrecioTotal():F2}");
+        }
+    }
+
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Console.WriteLine("Bienvenido a Chimi MiBarriga del Sr. Billy Navaja\n");
+
+            // Ejemplo de hamburguesa clásica
+            Console.WriteLine("\nCreando Hamburguesa Clásica:");
+            var hamburguesaClasica = new Hamburguesa("Brioche", "Res", 5.99m);
+            hamburguesaClasica.AgregarIngrediente("Lechuga", 0.50m);
+            hamburguesaClasica.AgregarIngrediente("Tomate", 0.50m);
+            hamburguesaClasica.AgregarIngrediente("Queso", 1.00m);
+            hamburguesaClasica.AgregarIngrediente("Bacon", 1.50m);
+            hamburguesaClasica.AgregarIngrediente("Pepinillo", 0.30m); // Este no se agregará (límite 4)
+            hamburguesaClasica.MostrarDetalle();
+
+            // Ejemplo de hamburguesa saludable
+            Console.WriteLine("\nCreando Hamburguesa Saludable:");
+            var hamburguesaSaludable = new HamburguesaSaludable("Pollo", 6.49m);
+            hamburguesaSaludable.AgregarIngrediente("Lechuga", 0.50m);
+            hamburguesaSaludable.AgregarIngrediente("Tomate", 0.50m);
+            hamburguesaSaludable.AgregarIngrediente("Aguacate", 1.50m);
+            hamburguesaSaludable.AgregarIngrediente("Cebolla", 0.30m);
+            hamburguesaSaludable.AgregarIngrediente("Champiñones", 1.00m);
+            hamburguesaSaludable.AgregarIngrediente("Queso bajo en grasa", 1.20m);
+            hamburguesaSaludable.AgregarIngrediente("Pepino", 0.30m); // Este no se agregará (límite 6)
+            hamburguesaSaludable.MostrarDetalle();
+
+            // Ejemplo de hamburguesa premium
+            Console.WriteLine("\nCreando Hamburguesa Premium:");
+            var hamburguesaPremium = new HamburguesaPremium("Brioche", "Angus", 8.99m);
+            hamburguesaPremium.AgregarIngrediente("Queso", 1.00m); // No se permitirá
+            hamburguesaPremium.MostrarDetalle();
+        }
+    }
+}
